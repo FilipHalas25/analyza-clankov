@@ -20,7 +20,7 @@ collection = db["analyza_slov_2"]
 
 # 🔄 Zistenie prvého a posledného dátumu
 def get_date_range():
-    default_start = "2025-03-01"  # ← zmenené z "2025-01-01"
+    default_start = "2025-03-01"
     default_end = datetime.now().strftime("%Y-%m-%d")
     
     first_article = collection.find_one({}, sort=[("Datum_publikacie", 1)])
@@ -73,7 +73,6 @@ def get_top_word_trends(start_date, end_date, category=None, limit=5, aggregatio
         else:
             match_query["Sekcia"] = category
 
-    # Najprv zistíme top N slov pre zadanú sekciu a dátumy
     pipeline = [
         {"$match": match_query},
         {"$group": {"_id": "$Najcastejsie_slovo", "count": {"$sum": "$Pocet"}}},
@@ -82,12 +81,10 @@ def get_top_word_trends(start_date, end_date, category=None, limit=5, aggregatio
     ]
     top_words = [word["_id"] for word in collection.aggregate(pipeline)]
 
-    # Zoskupenie podľa dátumu (denne alebo týždenne)
     date_grouping = "$Datum_publikacie" if aggregation == "day" else {
         "$dateTrunc": {"date": "$Datum_publikacie", "unit": "week"}
     }
 
-    # Pipeline pre vývoj slov
     trends_pipeline = [
         {"$match": match_query},
         {"$addFields": {"Datum_publikacie": {"$toDate": "$Datum_publikacie"}}},
@@ -109,7 +106,7 @@ def get_top_word_trends(start_date, end_date, category=None, limit=5, aggregatio
                 trends[word] = []
             trends[word].append((date, count))
 
-    return trends
+    return trends 
 
 # 📰 Streamlit UI
 st.title("\U0001F4F0 Analýza Novinových Článkov")
@@ -122,7 +119,6 @@ time_aggregation = st.radio("Vyberte časové rozlíšenie:", ["Denné", "Týžd
 start_date = st.date_input("Od dátumu", datetime.strptime(first_date, "%Y-%m-%d"))
 end_date = st.date_input("Do dátumu", datetime.strptime(last_date, "%Y-%m-%d"))
 
-# Možnosti pre zobrazenie grafu alebo článkov
 display_option = st.radio("Vyberte, čo chcete zobraziť:", ["Zobraziť vývoj slov", "Zobraziť články"])
 
 if display_option == "Zobraziť vývoj slov":
@@ -146,7 +142,10 @@ if display_option == "Zobraziť vývoj slov":
                 title=f"📊 Vývoj top {top_n} slov v sekcii '{selected_category}' ({time_aggregation})",
                 xaxis_title=f"Dátum ({time_aggregation} údaje)",
                 yaxis_title="Počet výskytov",
-                xaxis=dict(type="date"),
+                xaxis=dict(
+                    type="date",
+                    tickformat="%d. %b %Y"
+                ),
                 height=700,
                 width=1200,
                 legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
@@ -165,4 +164,5 @@ elif display_option == "Zobraziť články":
                 st.write(f"**{article['Datum_publikacie']}** - {article['URL']} - Najčastejšie slovo: {article['Najcastejsie_slovo']} (Počet: {article['Pocet']})")
         else:
             st.warning("❌ Žiadne články pre túto sekciu v zadanom období.")
+
 
