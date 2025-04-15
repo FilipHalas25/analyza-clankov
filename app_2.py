@@ -136,7 +136,14 @@ if display_option == "Zobraziť vývoj slov":
                 for word, values in trends.items():
                     values.sort()
                     dates, counts = zip(*values)
-                    fig.add_trace(go.Scatter(x=dates, y=counts, mode="lines+markers", name=word, line_shape='linear', marker=dict(size=8)))
+                    fig.add_trace(go.Scatter(
+                        x=dates,
+                        y=counts,
+                        mode="lines+markers",
+                        name=word,
+                        line_shape='spline',  # 🟢 Tu je zmena: vlnovitý graf
+                        marker=dict(size=8)
+                    ))
 
             fig.update_layout(
                 title=f"📊 Vývoj top {top_n} slov v sekcii '{selected_category}' ({time_aggregation})",
