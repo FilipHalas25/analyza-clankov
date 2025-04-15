@@ -4,3 +4,4 @@ plotly
 pymongo
 beautifulsoup4
 requests
+st-pages
