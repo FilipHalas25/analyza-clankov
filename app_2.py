@@ -172,4 +172,3 @@ elif display_option == "Zobraziť články":
         else:
             st.warning("❌ Žiadne články pre túto sekciu v zadanom období.")
 
-
